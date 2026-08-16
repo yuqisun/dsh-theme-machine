@@ -54,8 +54,7 @@ node scripts/build.mjs   # emits lib/index.js + lib/client.js (no dependencies)
 │   └── skin.css        # HUD chrome stylesheet (inlined into the client bundle)
 ├── scripts/build.mjs   # zero-dep build: wraps client.js into the
 │                       # window.__ModuleLoader__.load closure-factory format
-├── screenshots/        # demo screenshots shown in the README preview
-└── mock/index.html     # the original design mock
+└── screenshots/        # demo screenshots shown in the README preview
 ```
 
 The client bundle runs inside the dsh shell's frozen module table: the only `require()` allowed is platform modules (this skin uses just `react`); everything else arrives via cordis services (`ctx.theme`, `ctx.slots`) and the session-scope standard hooks (`useSession`, `useProjection`).
