@@ -30,7 +30,7 @@
 需要 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh` CLI）。插件通过 `dsh plugin` 管理，`--profile web` 指向 Web 配置。任选一种来源：
 
 ```sh
-# 从 npm（发布后）
+# 从 npm（推荐）
 dsh plugin --profile web add dsh-theme-machine
 
 # 从本地检出
@@ -61,32 +61,6 @@ dsh plugin --profile web remove dsh-theme-machine
 2. 重启 `dsh web`——完整还原官方外观。
 
 > 注意：如果 Loader 行是手动写入 `$DSH_HOME/cordis.patch.yml` 的，`remove` 不会改写那行补丁——请手动删除对应的 `insert` 条目。
-
-## 开发
-
-```sh
-node scripts/build.mjs   # 生成 lib/index.js + lib/client.js（零依赖）
-```
-
-```
-├── package.json        # dsh.bundle（cordis 补丁）+ dsh.client（浏览器端）清单
-├── cordis.patch.yml    # 注入配置组合的 Loader 行
-├── src/
-│   ├── index.js        # 宿主端（占位 apply）
-│   ├── client.js       # 浏览器端：token 层 + HUD + 遥测面板
-│   └── skin.css        # HUD 镀铬样式表（内联进客户端包）
-├── scripts/build.mjs   # 零依赖构建：将 client.js 包装为
-│                       # window.__ModuleLoader__.load 闭包工厂格式
-└── screenshots/        # README 预览中展示的演示截图
-```
-
-客户端包运行在 dsh shell 的冻结模块表内：唯一允许的 `require()` 是平台模块（本皮肤只用到 `react`）；其余一切均通过 cordis 服务（`ctx.theme`、`ctx.slots`）与会话级标准钩子（`useSession`、`useProjection`）注入。
-
-## 发布
-
-- **npm**：`pnpm publish`（prepack 会重建 `lib/`）——用户无需构建权限。
-- **tarball**：`pnpm pack`，分享 `.tgz`；用户执行 `dsh plugin add ./dsh-theme-machine-0.1.0.tgz`。
-- **GitHub**：得益于自包含的 `prepare`，开箱即用；添加 `dsh-plugin` 主题标签，方便生态发现。
 
 ## 许可证
 
