@@ -4,7 +4,11 @@
 
 《疑犯追踪》「机器」风格的 DeepSeek Harness 皮肤：深空蓝黑 + 机器青 HUD、扫描线氛围层，以及一个接入**真实会话遥测**的 TARGET ANALYSIS 悬浮面板。
 
-![mock](mock/index.html)
+## Preview · 预览
+
+![dsh-theme-machine — the full web UI with the MACHINE HUD skin applied](screenshots/demo1.png)
+
+![dsh-theme-machine — the live TARGET ANALYSIS telemetry panel](screenshots/demo2.png)
 
 ## What it does · 内容
 
@@ -50,6 +54,7 @@ node scripts/build.mjs   # emits lib/index.js + lib/client.js (no dependencies)
 │   └── skin.css        # HUD chrome stylesheet (inlined into the client bundle)
 ├── scripts/build.mjs   # zero-dep build: wraps client.js into the
 │                       # window.__ModuleLoader__.load closure-factory format
+├── screenshots/        # demo screenshots shown in the README preview
 └── mock/index.html     # the original design mock
 ```
 
