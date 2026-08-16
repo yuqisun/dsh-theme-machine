@@ -1,0 +1,365 @@
+/* dsh-theme-machine — HUD chrome layered over the --dsw-alias token override.
+   Injected as <style data-plugin="dsh-theme-machine"> at factory execution; the
+   loader removes plugin-owned tags on unload. Colors reference the alias
+   tokens so the chrome always tracks the token layer. */
+
+:root {
+  --dsh-machine-cy: #dce5ea;
+  --dsh-machine-cy-dim: rgba(220, 229, 236, .3);
+  --dsh-machine-cy-glow: rgba(220, 229, 236, .45);
+  --dsh-machine-red: #e5484d;
+  --dsh-machine-green: #8fb59d;
+  --dsh-machine-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+}
+
+body {
+  font-family: var(--dsh-machine-mono);
+  letter-spacing: .01em;
+}
+
+::selection {
+  background: rgba(220, 229, 236, .25);
+  color: #eaf6f5;
+}
+
+/* ---- the machine's crosshair: ONE floating reticle per tracked selection,
+   positioned by the JS tracker in client.js. CSS transitions on the box make
+   it GLIDE from the old row to the new one — target tracking, not target
+   switching. Covers sidebar session rows and trajectory rows. ---- */
+.dsh-machine-reticle {
+  position: fixed;
+  z-index: 65;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    top .38s cubic-bezier(.2, .85, .3, 1.12),
+    left .38s cubic-bezier(.2, .85, .3, 1.12),
+    width .38s cubic-bezier(.2, .85, .3, 1.12),
+    height .38s cubic-bezier(.2, .85, .3, 1.12),
+    opacity .15s ease-out;
+}
+.dsh-machine-reticle.locked { opacity: 1; }
+.dsh-machine-reticle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  --dsh-machine-frame: rgba(220, 229, 236, .85);
+  background:
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) left top / 9px 1.5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) left top / 1.5px 9px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) right top / 9px 1.5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) right top / 1.5px 9px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) left bottom / 9px 1.5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) left bottom / 1.5px 9px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) right bottom / 9px 1.5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) right bottom / 1.5px 9px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) center top / 1.5px 5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) center bottom / 1.5px 5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) left center / 5px 1.5px,
+    linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) right center / 5px 1.5px;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 3px rgba(220, 229, 236, .4));
+}
+.dsh-machine-reticle.threat::before {
+  --dsh-machine-frame: rgba(229, 72, 77, .9);
+  filter: drop-shadow(0 0 3px rgba(229, 72, 77, .5));
+  animation: dsh-machine-pulse 1.8s ease-in-out infinite;
+}
+
+/* ---- atmosphere: HUD grid + scanline (appended to <body> by the plugin) ---- */
+.dsh-machine-grid,
+.dsh-machine-scanline {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.dsh-machine-grid {
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(220, 229, 236, .03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 229, 236, .03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 30% 20%, black 15%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at 30% 20%, black 15%, transparent 70%);
+}
+.dsh-machine-scanline {
+  z-index: 2147483000;
+  background:
+    repeating-linear-gradient(0deg, rgba(140, 220, 225, .014) 0 1px, transparent 1px 3px);
+}
+.dsh-machine-scanline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(180deg, transparent, rgba(220, 229, 236, .045), transparent);
+  animation: dsh-machine-scan 8s linear infinite;
+}
+@keyframes dsh-machine-scan {
+  0% { top: -15%; }
+  100% { top: 110%; }
+}
+@keyframes dsh-machine-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+@keyframes dsh-machine-sweep {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- telemetry overlay (shell.overlay seat) ---- */
+.dsh-machine-overlay {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 70;
+  pointer-events: auto;
+  font-family: var(--dsh-machine-mono);
+  font-size: 12px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.dsh-machine-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--dsh-machine-cy-dim);
+  background: rgba(5, 10, 14, .88);
+  color: var(--dsh-machine-cy);
+  font-size: 10px;
+  letter-spacing: .25em;
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.dsh-machine-pill:hover { background: rgba(220, 229, 236, .1); }
+.dsh-machine-pill .live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-tertiary);
+  flex: none;
+}
+.dsh-machine-pill.running .live {
+  background: var(--dsh-machine-cy);
+  box-shadow: 0 0 8px var(--dsh-machine-cy-glow);
+  animation: dsh-machine-pulse 1.4s infinite;
+}
+
+.dsh-machine-panel {
+  width: 300px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: rgba(6, 11, 16, .94);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .55), 0 0 24px rgba(220, 229, 236, .06);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.dsh-machine-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  color: var(--dsh-machine-cy);
+  font-size: 10px;
+  letter-spacing: .3em;
+  text-shadow: 0 0 6px var(--dsh-machine-cy-dim);
+}
+.dsh-machine-panel-head button {
+  border: none;
+  background: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.dsh-machine-panel-head button:hover { color: var(--dsh-machine-cy); }
+
+.dsh-machine-panel-body { padding: 12px; }
+
+.dsh-machine-radar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.dsh-machine-radar { flex: none; }
+.dsh-machine-radar .ring {
+  fill: none;
+  stroke: var(--dsh-machine-cy-dim);
+  stroke-width: 1;
+}
+.dsh-machine-radar .ring-fill {
+  fill: none;
+  stroke: var(--dsh-machine-cy);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px var(--dsh-machine-cy-glow));
+  transition: stroke-dasharray .4s ease;
+}
+.dsh-machine-radar .sweep { fill: rgba(220, 229, 236, .16); }
+.dsh-machine-radar .blip {
+  fill: var(--dsh-machine-cy);
+  filter: drop-shadow(0 0 3px var(--dsh-machine-cy-glow));
+  animation: dsh-machine-pulse 1.5s infinite;
+}
+.dsh-machine-agent-state {
+  font-size: 10px;
+  letter-spacing: .18em;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.8;
+}
+.dsh-machine-agent-state b {
+  color: var(--dsh-machine-cy);
+  font-weight: 400;
+}
+.dsh-machine-panel.running .dsh-machine-agent-state b {
+  animation: dsh-machine-pulse 1.4s infinite;
+}
+
+.dsh-machine-kv {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  row-gap: 5px;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+.dsh-machine-kv dt { color: var(--dsw-alias-label-tertiary); }
+.dsh-machine-kv dd { color: var(--dsw-alias-label-primary); margin: 0; }
+
+.dsh-machine-prob-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--dsw-alias-label-secondary);
+  margin-bottom: 6px;
+}
+.dsh-machine-prob-row .lab { width: 58px; flex: none; letter-spacing: .1em; }
+.dsh-machine-prob-row .bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, .06);
+}
+.dsh-machine-prob-row .bar i {
+  display: block;
+  height: 100%;
+  background: var(--dsh-machine-cy);
+  box-shadow: 0 0 6px var(--dsh-machine-cy-dim);
+  transition: width .4s ease;
+}
+.dsh-machine-prob-row .bar i.r { background: var(--dsh-machine-red); box-shadow: 0 0 6px rgba(255, 77, 94, .4); }
+.dsh-machine-prob-row .bar i.g { background: var(--dsh-machine-green); box-shadow: 0 0 6px rgba(61, 220, 151, .4); }
+.dsh-machine-prob-row .val { width: 40px; text-align: right; flex: none; }
+
+/* SESSION TAPE — archival-playback ruler (the show's timeline scrubber) */
+.dsh-machine-tape { margin-top: 12px; }
+.dsh-machine-tape-ruler {
+  position: relative;
+  height: 30px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+.dsh-machine-tape-ruler .tick {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--dsw-alias-label-tertiary);
+}
+.dsh-machine-tape-ruler .tick.lab { height: 10px; background: var(--dsw-alias-label-secondary); }
+.dsh-machine-tape-ruler .tick.turn { height: 16px; width: 2px; background: var(--dsh-machine-cy); }
+.dsh-machine-tape-ruler .tick.err {
+  height: 12px;
+  width: 2px;
+  background: var(--dsh-machine-red);
+  box-shadow: 0 0 4px rgba(229, 72, 77, .6);
+}
+.dsh-machine-tape-ruler .frame {
+  position: absolute;
+  top: 0;
+  height: 20px;
+  border: 1px dashed var(--dsh-machine-cy-dim);
+}
+.dsh-machine-tape-ruler .play {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  width: 2px;
+  height: 22px;
+  background: var(--dsw-alias-label-tertiary);
+}
+.dsh-machine-tape-ruler .play.rec {
+  background: var(--dsh-machine-red);
+  box-shadow: 0 0 6px var(--dsh-machine-red);
+  animation: dsh-machine-pulse 1.6s infinite;
+}
+.dsh-machine-tape-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 9px;
+  color: var(--dsw-alias-label-tertiary);
+  letter-spacing: .12em;
+}
+
+/* ---- trajectory table: threat frames on failed rows ----
+   Selection is handled by the floating reticle tracker (it glides row to
+   row). Failed rows keep a static blinking threat frame until selected —
+   then the floating reticle takes over in threat mode. */
+tr[data-trajectory-row-key][data-error='true']:not([aria-selected='true']) {
+  animation: dsh-machine-threat-blink 1.8s ease-in-out infinite;
+}
+@keyframes dsh-machine-threat-blink {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(229, 72, 77, .9); }
+  50% { box-shadow: inset 0 0 0 1px rgba(229, 72, 77, .22); }
+}
+tr[data-trajectory-row-key][data-error='true']:not([aria-selected='true']) > td:first-child,
+tr[data-trajectory-row-key][data-error='true']:not([aria-selected='true']) > td:last-child {
+  position: relative;
+}
+tr[data-trajectory-row-key][data-error='true']:not([aria-selected='true']) > td:first-child::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) left top / 9px 1.5px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) left top / 1.5px 9px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) left bottom / 9px 1.5px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) left bottom / 1.5px 9px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) left center / 5px 1.5px;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 3px rgba(229, 72, 77, .5));
+  animation: dsh-machine-pulse 1.8s ease-in-out infinite;
+}
+tr[data-trajectory-row-key][data-error='true']:not([aria-selected='true']) > td:last-child::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) right top / 9px 1.5px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) right top / 1.5px 9px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) right bottom / 9px 1.5px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) right bottom / 1.5px 9px,
+    linear-gradient(rgba(229, 72, 77, .85), rgba(229, 72, 77, .85)) right center / 5px 1.5px;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 3px rgba(229, 72, 77, .5));
+  animation: dsh-machine-pulse 1.8s ease-in-out infinite;
+}
+
+.dsh-machine-stream {
+  margin-top: 10px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  padding-top: 8px;
+  max-height: 130px;
+  overflow-y: auto;
+  font-size: 10px;
+  line-height: 1.9;
+  color: var(--dsw-alias-label-tertiary);
+}
+.dsh-machine-stream .t { color: var(--dsw-alias-label-secondary); }
+.dsh-machine-stream .ok { color: var(--dsh-machine-green); }
+.dsh-machine-stream .err { color: var(--dsh-machine-red); }
+.dsh-machine-stream .run { color: var(--dsh-machine-cy); animation: dsh-machine-pulse 1.2s infinite; }
+.dsh-machine-stream .empty { color: var(--dsw-alias-label-tertiary); letter-spacing: .15em; }
