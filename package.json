@@ -11,6 +11,15 @@
     "person-of-interest"
   ],
   "license": "MIT",
+  "author": "yuqisun",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuqisun/dsh-theme-machine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yuqisun/dsh-theme-machine/issues"
+  },
+  "homepage": "https://github.com/yuqisun/dsh-theme-machine#readme",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

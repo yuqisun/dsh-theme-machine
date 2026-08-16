@@ -2,17 +2,17 @@
 
 **Person of Interest** skin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`) — THE MACHINE surveillance-HUD theme for the web UI: deep blue-black surfaces, machine-cyan accents, scanline/grid atmosphere, and a live telemetry panel that makes the UI feel like it's backed by a superintelligence.
 
-《疑犯追踪》「机器」风格的 DeepSeek Harness 皮肤：深空蓝黑 + 机器青 HUD、扫描线氛围层，以及一个接入**真实会话遥测**的 TARGET ANALYSIS 悬浮面板。
+> **[简体中文](README.zh-CN.md)**
 
-## Preview · 预览
+## Preview
 
 ![dsh-theme-machine — the full web UI with the MACHINE HUD skin applied](screenshots/demo1.png)
 
 ![dsh-theme-machine — the live TARGET ANALYSIS telemetry panel](screenshots/demo2.png)
 
-## Features · 功能
+## Features
 
-《疑犯追踪》THE MACHINE 深色 HUD 皮肤 —— 安装即生效，卸载即完整还原官方外观。
+A THE MACHINE dark HUD skin — applied on install, fully restored to the official look on uninstall.
 
 1. **Token override layer** — repaints the whole UI through `ctx.theme.overrideTokens()` (~50 `--dsw-alias-*` semantic tokens). Install = applied, uninstall = restored. Works on top of the built-in light/dark preference (the skin is dark-only by design and pins both palettes).
 2. **HUD chrome** — monospace typography, subtle HUD grid, slow scanline, cyan selection color. Injected as `<style data-plugin>` + two atmosphere `<div>`s, removed on unload.
@@ -25,7 +25,7 @@
 
 Collapsed it shrinks to a `MACHINE LINK` pill that pulses while the agent works.
 
-## Install · 安装
+## Install
 
 Requires [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh` CLI). Plugins are managed via `dsh plugin`; `--profile web` targets the web profile. Pick one source:
 
@@ -51,7 +51,7 @@ Then:
 dsh web --dump-config | grep dsh-theme-machine
 ```
 
-## Uninstall · 卸载
+## Uninstall
 
 ```sh
 dsh plugin --profile web remove dsh-theme-machine
@@ -62,7 +62,7 @@ dsh plugin --profile web remove dsh-theme-machine
 
 > Note: if the Loader row was manually written into `$DSH_HOME/cordis.patch.yml`, `remove` won't rewrite that patch line — delete the matching `insert` entry by hand.
 
-## Develop · 开发
+## Develop
 
 ```sh
 node scripts/build.mjs   # emits lib/index.js + lib/client.js (no dependencies)
@@ -82,7 +82,7 @@ node scripts/build.mjs   # emits lib/index.js + lib/client.js (no dependencies)
 
 The client bundle runs inside the dsh shell's frozen module table: the only `require()` allowed is platform modules (this skin uses just `react`); everything else arrives via cordis services (`ctx.theme`, `ctx.slots`) and the session-scope standard hooks (`useSession`, `useProjection`).
 
-## Publish · 发布
+## Publish
 
 - **npm**: `pnpm publish` (prepack rebuilds `lib/`) — users need no build permission.
 - **tarball**: `pnpm pack`, share the `.tgz`; users `dsh plugin add ./dsh-theme-machine-0.1.0.tgz`.
