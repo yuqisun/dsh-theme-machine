@@ -1,6 +1,6 @@
 {
   "name": "dsh-theme-machine",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Person-of-Interest skin for DeepSeek Harness: THE MACHINE surveillance-HUD theme (dark, cyan-on-black). Token override layer + HUD chrome + live telemetry panel for the dsh web UI.",
   "keywords": [
     "dsh-plugin",
