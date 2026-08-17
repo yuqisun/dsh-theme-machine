@@ -4,12 +4,22 @@
    tokens so the chrome always tracks the token layer. */
 
 :root {
+  /* The skin is dark-only by design: pin the native color scheme (scrollbars,
+     form controls) to dark regardless of the user's light/dark preference.
+     `!important` is required — ui-layout's ThemePresenter writes the scheme as
+     an inline style on <html>, and only an important stylesheet rule beats it.
+     Removed together with this <style> tag on unload. */
+  color-scheme: dark !important;
   --dsh-machine-cy: #dce5ea;
   --dsh-machine-cy-dim: rgba(220, 229, 236, .3);
   --dsh-machine-cy-glow: rgba(220, 229, 236, .45);
   --dsh-machine-red: #e5484d;
   --dsh-machine-green: #8fb59d;
-  --dsh-machine-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+  /* Mono CJK first so Chinese keeps the terminal feel, then system CJK sans as
+     a broad fallback. Without these, every CJK glyph fell past the Latin-only
+     faces to the OS's arbitrary generic `monospace`. */
+  --dsh-machine-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "Courier New",
+    "Noto Sans Mono CJK SC", "Microsoft YaHei UI", "PingFang SC", monospace;
 }
 
 body {
