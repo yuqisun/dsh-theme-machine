@@ -27,6 +27,19 @@ body {
   letter-spacing: .01em;
 }
 
+/* The composer input is a transparent <textarea> (owns the caret) stacked under
+   a backdrop layer that renders the visible text (dsh-client-ui-conversation
+   InputBar). The browser's UA stylesheet resets letter-spacing to normal on
+   form controls, so the textarea's caret advances at pure glyph width while the
+   backdrop inherits body's .01em — every typed character drifts the caret a
+   hair behind the visible text, accumulating per line. Unify the whole card on
+   `normal` so caret and text stay aligned; the HUD letter-spacing is kept
+   everywhere else. */
+[data-composer-card],
+[data-composer-card] * {
+  letter-spacing: normal;
+}
+
 ::selection {
   background: rgba(220, 229, 236, .25);
   color: #eaf6f5;
@@ -69,6 +82,10 @@ body {
     linear-gradient(var(--dsh-machine-frame), var(--dsh-machine-frame)) right center / 5px 1.5px;
   background-repeat: no-repeat;
   filter: drop-shadow(0 0 3px rgba(220, 229, 236, .4));
+  /* locked-on "breathing": a faint, slow opacity pulse so a live target feels
+     held, not frozen. The threat variant below overrides with a stronger,
+     faster red pulse — same property, higher specificity wins. */
+  animation: dsh-machine-breathe 3.6s ease-in-out infinite;
 }
 .dsh-machine-reticle.threat::before {
   --dsh-machine-frame: rgba(229, 72, 77, .9);
@@ -113,6 +130,10 @@ body {
 @keyframes dsh-machine-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: .35; }
+}
+@keyframes dsh-machine-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .6; }
 }
 @keyframes dsh-machine-sweep {
   to { transform: rotate(360deg); }
